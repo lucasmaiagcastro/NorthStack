@@ -1,3 +1,5 @@
+from app.agents.architecture_agent import ArchitectureAgent
+from app.core.config import settings
 from app.schemas.architecture import (
     ArchitecturePlanRequest,
     ArchitecturePlanResponse,
@@ -5,7 +7,7 @@ from app.schemas.architecture import (
 )
 
 
-def generate_architecture_plan(
+def _mock_architecture_plan(
     request: ArchitecturePlanRequest,
 ) -> ArchitecturePlanResponse:
     return ArchitecturePlanResponse(
@@ -49,3 +51,19 @@ flowchart TD
             "Add architecture comparison mode",
         ],
     )
+
+
+def generate_architecture_plan(
+    request: ArchitecturePlanRequest,
+) -> ArchitecturePlanResponse:
+    if not settings.openai_api_key:
+        return _mock_architecture_plan(request)
+
+    try:
+        agent = ArchitectureAgent(
+            api_key=settings.openai_api_key,
+            model_id=settings.openai_model,
+        )
+        return agent.generate_plan(request)
+    except Exception:
+        return _mock_architecture_plan(request)
