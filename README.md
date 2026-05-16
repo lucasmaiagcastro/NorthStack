@@ -1,94 +1,142 @@
 # Northstack
 
-Northstack is an agentic backend platform that transforms raw software ideas into structured technical architecture blueprints.
+Northstack is a FastAPI backend that turns raw software project ideas into
+structured technical architecture plans.
 
-The platform uses AI agents to analyze project requirements and generate:
+The current MVP receives a project idea, sends it through an architecture
+planning service, and returns a typed JSON response with stack recommendations,
+architecture overview, Mermaid diagram, MVP scope, risks, and future evolution
+notes.
 
-- recommended stacks
-- architecture decisions
-- cloud suggestions
-- scalability considerations
-- Mermaid diagrams
-- implementation roadmaps
-- MVP recommendations
-- technical risks
-
-The goal is to help developers and teams design software architectures before writing code.
+Northstack is intended to behave like a practical software architecture
+assistant, focused on maintainable systems and realistic engineering tradeoffs.
 
 ---
 
-# Vision
+## Current Status
 
-Many developers can generate code using AI tools, but still struggle with:
+Current stage: MVP architecture planning backend.
 
-- software architecture
-- infrastructure decisions
-- scalability planning
-- backend structuring
-- cloud design
-- engineering tradeoffs
+Implemented:
 
-Northstack aims to become an intelligent architecture copilot focused on practical and maintainable engineering decisions.
+- FastAPI application
+- Health check endpoint
+- Architecture planning endpoint
+- Pydantic request and response schemas
+- Architecture service layer
+- Agno/OpenAI-backed architecture agent
+- Mock fallback when `OPENAI_API_KEY` is not configured
+- Minimal pytest coverage for the architecture service
 
----
+Not implemented yet:
 
-# Setup
-
-## Install dependencies
-
-```bash
-uv sync
-```
-
-## Run locally
-
-```bash
-uv run uvicorn app.main:app --reload
-```
+- Frontend
+- Authentication
+- Database persistence
+- Report storage
+- Multi-agent orchestration
+- Cloud cost estimation
+- Production deployment setup
 
 ---
 
-# Tech Stack
+## Tech Stack
 
-## Backend
-- Python
+- Python 3.14+
 - FastAPI
+- Pydantic
 - Agno
-
-## AI
 - OpenAI API
+- uv
+- pytest
+- Ruff
 
-## Infrastructure
-- Docker
-- Docker Compose
-- OrbStack
+Planned later:
 
-## Database
 - PostgreSQL
-
-## Future Additions
+- Docker / Docker Compose
 - Redis
 - pgvector
 - AWS integrations
 - Observability
 - RAG
-- Streaming responses
 
 ---
 
-# Core Features
+## Setup
 
-- Project architecture planning
-- Stack recommendations
-- Cloud service suggestions
-- Mermaid diagram generation
-- MVP scoping
-- Technical roadmap generation
-- Engineering tradeoff analysis
+Install dependencies:
+
+```bash
+uv sync
+```
+
+Run the API locally:
+
+```bash
+uv run uvicorn app.main:app --reload
+```
+
+Open the interactive API docs:
+
+```txt
+http://127.0.0.1:8000/docs
+```
 
 ---
 
-# Example Input
+## Configuration
+
+Northstack reads configuration from environment variables and, in local
+development, from `.env`.
+
+Supported settings:
+
+```env
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-4o-mini
+APP_ENV=development
+```
+
+If `OPENAI_API_KEY` is not set, the architecture service returns a deterministic
+mock architecture plan. This keeps local development and tests independent from
+the real OpenAI API.
+
+Do not commit secrets.
+
+---
+
+## API
+
+### `GET /`
+
+Basic root endpoint.
+
+Example response:
+
+```json
+{
+  "message": "Northstack is running"
+}
+```
+
+### `GET /health`
+
+Health check endpoint.
+
+Example response:
+
+```json
+{
+  "status": "ok"
+}
+```
+
+### `POST /architecture/plan`
+
+Generates a structured architecture plan from a project idea.
+
+Example request:
 
 ```json
 {
@@ -96,86 +144,130 @@ uv run uvicorn app.main:app --reload
   "constraints": {
     "budget": "low",
     "cloud": "aws",
-    "team_size": "solo developer"
+    "team_size": "solo developer",
+    "experience_level": "intermediate"
   }
 }
 ```
 
-# Example Output
+Example response shape:
 
-- Recommended backend stack
-- Database choice
-- Cloud architecture
-- Mermaid diagrams
-- MVP roadmap
-- Risks and tradeoffs
-- Scaling suggestions
-
----
-
-# Project Philosophy
-
-Northstack avoids overengineering.
-
-The system should prioritize:
-- simplicity
-- maintainability
-- cost efficiency
-- realistic architectures
-- practical engineering decisions
-
-This is not a "generate random enterprise architecture" tool.
-
-The focus is:
-- useful architectures
-- solo developer friendly systems
-- startup-friendly infrastructure
-- scalable evolution paths
+```json
+{
+  "project_summary": "Architecture plan for: I want to build a SaaS platform for price monitoring with alerts and dashboards.",
+  "recommended_stack": {
+    "backend": "FastAPI",
+    "database": "PostgreSQL",
+    "cache": "Redis",
+    "cloud": "aws",
+    "containerization": "Docker"
+  },
+  "architecture_overview": "Start with a modular monolith architecture...",
+  "mermaid_diagram": "flowchart TD\n    USER[User]\n    API[FastAPI Backend]",
+  "mvp_scope": [
+    "Create FastAPI backend",
+    "Add PostgreSQL persistence"
+  ],
+  "risks": [
+    "Overengineering too early"
+  ],
+  "future_evolution": [
+    "Add async workers"
+  ]
+}
+```
 
 ---
 
-# Development Status
+## Development
 
-Current stage:
-- MVP architecture planning
+Run tests:
 
-Planned:
-- multi-agent orchestration
-- architecture memory
-- cloud cost estimation
-- frontend dashboard
-- architecture comparison mode
+```bash
+uv run pytest
+```
+
+Run tests for the architecture service only:
+
+```bash
+uv run pytest tests/services/test_architecture_service.py
+```
+
+Run lint checks:
+
+```bash
+uv run ruff check app tests
+```
+
+---
+
+## Project Structure
+
+```txt
+app/
+├── agents/
+│   └── architecture_agent.py
+├── api/
+│   └── routes.py
+├── core/
+│   └── config.py
+├── prompts/
+│   └── architecture_prompt.py
+├── schemas/
+│   └── architecture.py
+├── services/
+│   └── architecture_service.py
+└── main.py
+
+docs/
+├── AGENTS.md
+├── ARCHITECTURE.md
+├── CODEX.md
+├── CONTEXT.md
+└── ROADMAP.md
+
+tests/
+└── services/
+    └── test_architecture_service.py
+```
+
+---
+
+## Design Principles
+
+Northstack favors:
+
+- simple architecture first
+- typed schemas
+- thin API routes
+- business logic in services
+- agent logic isolated in `app/agents`
+- prompts isolated in `app/prompts`
+- practical recommendations over buzzwords
+- incremental evolution instead of premature complexity
+
+Northstack avoids:
+
+- frontend work during the current MVP
+- database persistence until explicitly added
+- unnecessary multi-agent orchestration
+- hardcoded secrets
+- overengineered abstractions
 
 ---
 
 ## Documentation
 
-Project documentation is available inside the `/docs` folder.
+Project documentation lives in `docs/`:
 
-- Architecture
-- Agents
-- Roadmap
-- AI assistant context
-- Engineering decisions
-
----
-
-# Local Development
-
-## Run with Docker
-
-```bash
-docker compose up --build
-```
-
-## Run locally
-
-```bash
-uvicorn app.main:app --reload
-```
+- `docs/CONTEXT.md`
+- `docs/ARCHITECTURE.md`
+- `docs/AGENTS.md`
+- `docs/ROADMAP.md`
+- `docs/CODEX.md`
 
 ---
 
-# License
+## License
 
 MIT
