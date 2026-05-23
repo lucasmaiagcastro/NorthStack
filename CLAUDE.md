@@ -1,4 +1,4 @@
-# Codex Project Instructions — Northstack
+# Claude Code Instructions — Northstack
 
 Always communicate with me in Brazilian Portuguese.
 
@@ -12,7 +12,16 @@ Before modifying code, read:
 - docs/AGENTS.md
 - docs/ROADMAP.md
 
-Project rules:
+Project stack:
+- Python
+- uv
+- FastAPI
+- Agno
+- OpenAI API
+- PostgreSQL later
+- Docker later
+
+Rules:
 - Use uv only. Do not use pip, poetry or requirements.txt.
 - Do not run git commands.
 - Do not modify .env.
@@ -22,12 +31,24 @@ Project rules:
 - Prefer FastAPI, Python, PostgreSQL, Docker and Agno.
 - Do not add frontend, database persistence or multi-agent orchestration unless requested.
 
-When running commands:
-- You may run safe read/check commands such as:
-  - uv run ruff check app
-  - uv run pytest
-  - uv run python -c "..."
-  - ls
-  - cat
-  - grep
-- Ask before destructive commands, dependency changes, Docker commands, network calls, file deletion or anything involving Git.
+Before modifying files:
+1. Explain the implementation plan.
+2. List all files that will change.
+3. Explain exactly what will be added or removed.
+4. Wait for my approval.
+
+Safe commands:
+- uv run pytest
+- uv run ruff check app tests
+- uv run python -c "..."
+- ls
+- cat
+- grep
+
+Ask before:
+- deleting files
+- changing dependencies
+- Docker commands
+- network calls
+- git commands
+- modifying .env
